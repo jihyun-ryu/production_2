@@ -1,261 +1,697 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Audio Rating Task</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sarcasm in Korean – Speech Recording Experiment</title>
+
+  <!-- jsPsych -->
   <link rel="stylesheet" href="https://unpkg.com/jspsych@8.0.0/css/jspsych.css">
   <script src="https://unpkg.com/jspsych@8.0.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-html-button-response@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-preload@2.0.0"></script>
-  <script src="https://unpkg.com/@jspsych/plugin-audio-slider-response@2.0.0"></script>
   <script src="https://unpkg.com/@jspsych/plugin-survey-html-form@2.0.0"></script>
+
   <style>
     body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     }
-    #jspsych-target {
-      max-width: 800px;
+    .recording-container {
+      text-align: center;
+      padding: 40px;
+      max-width: 880px;
       margin: 0 auto;
+    }
+    .sentence-display {
+      font-size: 28px;
+      font-weight: bold;
+      padding: 30px;
+      margin: 30px 0 15px;
+      background: #f7f7f7;
+      border-radius: 12px;
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    .recording-status {
+      font-size: 20px;
+      margin: 18px 0 6px;
+      min-height: 30px;
+    }
+    .recording-active {
+      color: #dc3545;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: .35; }
+    }
+    .timer {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 6px 0 14px;
+    }
+    .control-buttons {
+      margin-top: 18px;
+    }
+    .control-buttons button {
+      font-size: 18px;
+      padding: 14px 36px;
+      margin: 0 8px;
+      cursor: pointer;
+    }
+    .record-btn {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+    .record-btn:hover:not(:disabled) { background-color: #c82333; }
+    .stop-btn {
+      background-color: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+    .stop-btn:hover:not(:disabled) { background-color: #218838; }
+    .next-btn {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+    }
+    .next-btn:hover:not(:disabled) { background-color: #0069d9; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .form-container {
+      text-align: left;
+      max-width: 720px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .form-container p { margin: 10px 0; }
+    .form-container label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+    .form-container input[type="text"] {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .form-container input[type="radio"] { margin: 0 6px 0 14px; }
+
+    .pill {
+      background:#ffe08a;
+      padding:4px 10px;
+      border-radius:999px;
+      display:inline-block;
+      font-size:16px;
+      margin-bottom:6px;
+    }
+    .meta {
+      margin-bottom: 10px;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
   <div id="jspsych-target"></div>
-  
+
   <script>
     /******************************************************
-     * Audio Rating Task (slider) + Google Sheets upload
+     * Sarcasm in Korean – Speech Recording Experiment
+     * (곽성민, 류지현) – Production Study
      ******************************************************/
 
     console.log('Script starting...');
 
     /* ===== CONFIG ===== */
-    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxIdFT4c8QBy9_4vs8u1KfEOIspiXu3hSWYDsi3CpeqUoDgaHF_Zxt7s6rhouY9OJCwUA/exec';
+    const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwqqmYSvBRy4arh_PiPKgw2T8cCN4jgMv2oKijeq3KwuEjq6ZCuhaebigmJ-1CXlBcK/exec';
 
     /* ===== UI TEXTS ===== */
     const TEXTS = {
-      welcomeTitle: 'Audio Rating Task',
-      welcomeBody: 'You will hear short sounds and rate them on a scale.',
+      welcomeTitle: 'Speech Recording Experiment',
+      welcomeBody: '화면에 표시되는 문장을 자연스럽게 읽어주세요.<br><strong>조용한 환경에서 진행해주세요.</strong>',
       startBtn: 'Start',
-      prompt: 'How strongly did this sound match the "sarcastic" category?',
-      leftLabel: 'Not at all',
-      rightLabel: 'Very strongly',
-      endTitle: 'Thanks!',
-      endBody: 'Your data have been prepared. If upload fails, use the CSV button.',
-      finishBtn: 'Finish'
+      ready: '준비되면 녹음 버튼을 눌러주세요',
+      recording: '🔴 녹음 중...',
+      stopped: '녹음이 완료되었습니다. 다음 버튼을 눌러주세요.',
+      recordBtn: '녹음 시작',
+      stopBtn: '녹음 완료',
+      nextBtn: '다음',
+      endTitle: '감사합니다!',
+      endBody: '실험이 완료되었습니다.',
+      finishBtn: '종료'
     };
 
-    /* ===== STIMULI ===== */
-    const STIMULI = [
-      { file: 'audio/amazed.wav' },
-      { file: 'audio/sarcastic.wav' },
-      { file: 'audio/angry.wav' }
-    ];
-
-    /* ===== SLIDER SETTINGS ===== */
-    const SLIDER = {
-      min: 1, max: 7, step: 1, start: 4, require_movement: true,
-      labels: ['1','2','3','4','5','6','7']
-    };
+    /* ===== GLOBAL STATE ===== */
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let participantId = null;
+    let demographicsData = null;
+    let currentTimerInterval = null;
+    let isRecording = false;
 
     /* ===== INIT ===== */
-    let jsPsych;
-    try {
-      jsPsych = initJsPsych({
-        display_element: 'jspsych-target',
-        on_finish: async () => {
-          console.log('Experiment finished');
-          const ok = await uploadAllRowsToGoogle();
-          if (!ok) {
-            const csv = jsPsych.data.get().csv();
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; 
-            a.download = 'data_fallback.csv';
-            a.textContent = 'Download CSV (upload failed)';
-            a.style.display = 'block';
-            a.style.margin = '20px auto';
-            a.style.textAlign = 'center';
-            document.body.appendChild(a);
-          }
-        }
-      });
-      console.log('jsPsych initialized:', jsPsych);
-    } catch (error) {
-      console.error('Error initializing jsPsych:', error);
-      document.body.innerHTML = '<div style="padding: 20px; color: red;">Error initializing jsPsych: ' + error.message + '</div>';
-    }
+    const jsPsych = initJsPsych({
+      display_element: 'jspsych-target',
+      on_finish: () => console.log('Experiment finished')
+    });
 
-    /* ===== PRELOAD ===== */
-    const preload = {
-      type: jsPsychPreload,
-      audio: STIMULI.map(s => s.file),
-      on_error: (file) => {
-        console.warn('Failed to load:', file);
-      },
-      on_success: () => {
-        console.log('All files preloaded successfully');
-      }
-    };
-
-    /* ===== SCREENS ===== */
+    /* ===== WELCOME ===== */
     const welcome = {
       type: jsPsychHtmlButtonResponse,
       stimulus: `<h2>${TEXTS.welcomeTitle}</h2><p>${TEXTS.welcomeBody}</p>`,
       choices: [TEXTS.startBtn]
     };
 
-    const end = {
+    /* ===== INSTRUCTIONS (연구 소개/방법/주의) ===== */
+    const instructions = {
       type: jsPsychHtmlButtonResponse,
-      stimulus: `<h2>${TEXTS.endTitle}</h2><p>${TEXTS.endBody}</p>`,
-      choices: [TEXTS.finishBtn]
-    };
+      stimulus: `
+        <div class="form-container" style="max-width:800px;">
+          <h2>안녕하세요.</h2>
+          <p>저희는 <strong>영어음성학프로젝트</strong> 수업 중 <em>Sarcasm in Korean</em>을 주제로 연구하고 있는 <strong>곽성민, 류지현</strong>입니다.</p>
+          <p><strong>7가지 상황</strong>을 <strong>3가지 방식</strong>(일반/진심/비꼼)으로 녹음하며, 약 <strong>5–10분</strong>이 소요됩니다.<br>
+          수집된 음성은 <strong>음성 분석 후 즉시 폐기</strong>됩니다.</p>
 
-    /* ===== DEMOGRAPHIC SURVEY ===== */
-    const demographics = {
-      type: jsPsychSurveyHtmlForm,
-      preamble: '<h3>참가자 정보</h3><p>아래 정보를 입력해주세요.</p>',
-      html: `
-        <div style="text-align: left; max-width: 500px; margin: 0 auto;">
-          <p><label for="gender"><strong>성별:</strong></label><br>
-          <input type="radio" name="gender" value="남" required> 남
-          <input type="radio" name="gender" value="여" required> 여</p>
-          
-          <p><label for="birth_year"><strong>태어난 해:</strong></label><br>
-          <input type="text" id="birth_year" name="birth_year" placeholder="YYYY (예: 1995)" pattern="[0-9]{4}" required style="width: 150px;"></p>
-          
-          <p><label for="birth_month"><strong>태어난 월:</strong></label><br>
-          <input type="text" id="birth_month" name="birth_month" placeholder="MM (예: 03)" pattern="[0-9]{2}" required style="width: 80px;"></p>
-          
-          <p><label for="native_lang"><strong>모국어:</strong></label><br>
-          <input type="text" id="native_lang" name="native_lang" placeholder="예: 한국어" required style="width: 200px;"></p>
-          
-          <p><label for="dialect"><strong>방언:</strong></label><br>
-          <input type="text" id="dialect" name="dialect" placeholder="예: 서울, 경상도" style="width: 200px;"></p>
-          
-          <p><label for="foreign_lang"><strong>외국어:</strong></label><br>
-          <input type="text" id="foreign_lang" name="foreign_lang" placeholder="예: 영어, 일본어" style="width: 300px;"></p>
+          <h3>참여 방법</h3>
+          <ul>
+            <li>각 상황에는 <strong>강조된 단어</strong>(예: “잘한다”)가 있습니다.</li>
+            <li>해당 단어를 표시된 <strong>세 가지 방식</strong>으로 각각 녹음합니다. <em>(제시 순서는 무작위)</em></li>
+            <li>(a) 일반적 말하기 방식 &nbsp; (b) 진심으로 말하는 방식 &nbsp; (c) 비꼬는(풍자적) 방식</li>
+          </ul>
+
+          <h3>주의 사항</h3>
+          <ul>
+            <li>부착된 마이크를 입에서 <strong>약 10cm</strong> 떨어진 위치에 두고 녹음해주세요.</li>
+            <li>주변 소음을 최소화한 <strong>조용한 환경</strong>에서 진행해주세요.</li>
+            <li><strong>자연스러운 발화</strong>가 중요합니다. 과장하지 말고 평소 말하듯이 읽어주세요.</li>
+          </ul>
         </div>
       `,
-      button_label: '제출',
+      choices: ['시작하기']
+    };
+
+    /* ===== DEMOGRAPHICS ===== */
+    const demographics = {
+      type: jsPsychSurveyHtmlForm,
+      preamble: '<h3>참가자 정보</h3><p>실험을 시작하기 전에 아래 정보를 입력해주세요.</p>',
+      html: `
+        <div class="form-container">
+          <p>
+            <label for="gender">성별:</label>
+            <input type="radio" name="gender" value="남" required> 남
+            <input type="radio" name="gender" value="여" required> 여
+          </p>
+          <p>
+            <label for="birth_year">태어난 해:</label>
+            <input type="text" id="birth_year" name="birth_year" placeholder="YYYY (예: 1995)" pattern="[0-9]{4}" required style="width: 150px;">
+          </p>
+          <p>
+            <label for="birth_month">태어난 월:</label>
+            <input type="text" id="birth_month" name="birth_month" placeholder="MM (예: 03)" pattern="[0-9]{1,2}" required style="width: 80px;">
+          </p>
+          <p>
+            <label for="native_lang">모국어:</label>
+            <input type="text" id="native_lang" name="native_lang" placeholder="예: 한국어" required style="width: 200px;">
+          </p>
+          <p>
+            <label for="dialect">방언:</label>
+            <input type="text" id="dialect" name="dialect" placeholder="예: 서울, 경상도" style="width: 200px;">
+          </p>
+          <p>
+            <label for="foreign_lang">외국어:</label>
+            <input type="text" id="foreign_lang" name="foreign_lang" placeholder="예: 영어, 일본어" style="width: 300px;">
+          </p>
+        </div>
+      `,
+      button_label: '녹음 시작하기',
       data: { task: 'demographics' },
       on_finish: (data) => {
-        data.user_agent = navigator.userAgent;
+        demographicsData = data.response;
+        participantId = 'P' + Date.now();
+        data.participant_id = participantId;
         data.timestamp = new Date().toISOString();
-        console.log('Demographics:', data.response);
+        console.log('=== Demographics saved ===', participantId, demographicsData);
       }
     };
 
-    /* ===== RATING TRIAL ===== */
-    let currentTrialStartTime = null;
-
-    const rating_trial = {
-      type: jsPsychAudioSliderResponse,
-      stimulus: jsPsych.timelineVariable('file'),
-      prompt: `<p>${TEXTS.prompt}</p>
-               <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-top:4px;">
-                <span>${TEXTS.leftLabel}</span><span>${TEXTS.rightLabel}</span>
-               </div>`,
-      min: SLIDER.min,
-      max: SLIDER.max,
-      slider_start: SLIDER.start,
-      step: SLIDER.step,
-      labels: SLIDER.labels,
-      require_movement: SLIDER.require_movement,
-      response_allowed_while_playing: false,
-      trial_ends_after_audio: false,
-      data: { 
-        task: 'rating', 
-        stimulus_file: jsPsych.timelineVariable('file')
-      },
-      on_load: function() {
-        // 트라이얼 시작 시점 기록
-        currentTrialStartTime = new Date().toISOString();
-        console.log('Trial loaded, start time:', currentTrialStartTime);
-      },
-      on_finish: (data) => {
-        data.rating = data.response;
-        data.stimulus = data.stimulus_file || data.stimulus;
-        data.trial_start_time = currentTrialStartTime;
-        data.response_time = new Date().toISOString(); // 응답한 시점
-        data.user_agent = navigator.userAgent;
-        
-        console.log('Trial finished:', {
-          stimulus: data.stimulus,
-          rating: data.rating,
-          trial_start: data.trial_start_time,
-          response: data.response_time
-        });
+    /* ===== MICROPHONE PERMISSION ===== */
+    const mic_permission = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: '<h3>마이크 권한 요청</h3><p>녹음을 위해 마이크 사용을 허용해주세요.</p>',
+      choices: ['마이크 허용'],
+      on_finish: async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          stream.getTracks().forEach(track => track.stop());
+          console.log('Microphone permission granted');
+        } catch (err) {
+          alert('마이크 권한이 필요합니다. 브라우저 설정에서 마이크를 허용해주세요.');
+          console.error('Microphone error:', err);
+        }
       }
     };
 
-    /* ===== RANDOM ORDER BLOCK ===== */
-    const rating_block = {
-      timeline: [rating_trial],
-      timeline_variables: STIMULI,
-      randomize_order: true
-    };
+    /* ===== 7 키워드 × (중립/진심/비꼼) 정의 ===== */
+    const SCENARIOS = [
+      {
+        keyword: "잘한다",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 평범하게 과제를 제출하고 '나 어땠어?'라고 물을 때", sentence: "잘한다" },
+          { style: "진심", label: "상황1", context: "친구가 과제에서 1등을 하고 '나 잘했지?'라고 말할 때",       sentence: "잘한다" },
+          { style: "비꼼", label: "상황2", context: "친구가 과제를 겨우 제출하고 '나 잘했지?'라고 말할 때",         sentence: "잘한다" },
+        ]
+      },
+      {
+        keyword: "대단하다",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 시험을 치르고 평범한 반응을 보일 때",                     sentence: "대단하다" },
+          { style: "진심", label: "상황1", context: "친구가 시험을 정말 열심히 준비해서 높은 점수를 받았을 때",       sentence: "대단하다" },
+          { style: "비꼼", label: "상황2", context: "친구가 거의 운으로 점수를 받았다고 신나 있을 때",               sentence: "대단하다" },
+        ]
+      },
+      {
+        keyword: "좋았어",
+        items: [
+          { style: "일반", label: "중립",  context: "발표를 무난히 마친 상황에서 '어땠어?'라고 물을 때",               sentence: "좋았어" },
+          { style: "진심", label: "상황1", context: "발표를 유창하게 잘 끝낸 친구가 '좋았지?'라고 물을 때",          sentence: "좋았어" },
+          { style: "비꼼", label: "상황2", context: "준비 없이 발표하고도 당당한 친구가 '좋았지?'라고 말할 때",        sentence: "좋았어" },
+        ]
+      },
+      {
+        keyword: "대박이다",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 운동을 다녀와 그냥 소감을 말할 때",                        sentence: "대박이다" },
+          { style: "진심", label: "상황1", context: "친구가 꾸준히 운동해서 체력이 좋아진 걸 보여줄 때",              sentence: "대박이다" },
+          { style: "비꼼", label: "상황2", context: "이틀 운동해놓고 '나 벌써 달라졌지?' 하는 친구에게",               sentence: "대박이다" },
+        ]
+      },
+      {
+        keyword: "참 잘해",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 평범하게 요리했을 때",                                     sentence: "참 잘해" },
+          { style: "진심", label: "상황1", context: "친구가 정성 들여 요리해서 맛있을 때",                            sentence: "참 잘해" },
+          { style: "비꼼", label: "상황2", context: "맛은 별론데 친구가 스스로 칭찬할 때",                            sentence: "참 잘해" },
+        ]
+      },
+      {
+        keyword: "멋있다",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 일상을 성실히 해낸 보통의 상황에서",                        sentence: "멋있다" },
+          { style: "진심", label: "상황1", context: "친구가 힘든 상황을 참아내고 회복했을 때",                         sentence: "멋있다" },
+          { style: "비꼼", label: "상황2", context: "별일 아닌 걸 엄청 고생한 것처럼 말할 때",                         sentence: "멋있다" },
+        ]
+      },
+      {
+        keyword: "역시",
+        items: [
+          { style: "일반", label: "중립",  context: "친구가 평소처럼 약속을 지킨 상황에서",                             sentence: "역시" },
+          { style: "진심", label: "상황1", context: "친구가 약속 시간 딱 맞춰(on time) 도착했을 때",                   sentence: "역시" },
+          { style: "비꼼", label: "상황2", context: "항상 늦는 친구가 또 늦고 '그래도 많이 안 늦었지?' 할 때",          sentence: "역시" },
+        ]
+      },
+    ];
 
-    /* ===== RUN ===== */
-    if (jsPsych) {
-      console.log('Starting experiment...');
-      jsPsych.run([preload, welcome, rating_block, demographics, end]);
-    } else {
-      console.error('jsPsych not initialized');
+    // 7×3 = 21개 항목 평탄화 후 무작위 셔플
+    const TRIAL_ITEMS = jsPsych.randomization.shuffle(
+      SCENARIOS.flatMap(s =>
+        s.items.map(it => ({
+          keyword: s.keyword,
+          sentence: it.sentence,
+          context_label: it.label,   // "중립" | "상황1" | "상황2"
+          context_text: it.context,
+          style: it.style            // "일반" | "진심" | "비꼼"
+        }))
+      )
+    );
+
+    /* ===== RECORDING TRIAL FACTORY ===== */
+    function makeRecordingTrial(item, index) {
+      const { sentence, keyword, context_label, context_text, style } = item;
+      return {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: () => `
+          <div class="recording-container">
+            <div class="sentence-display">
+              <span class="pill">키워드: <strong>${keyword}</strong></span><br>
+              <span style="font-size:24px;">“${sentence}”</span>
+            </div>
+            <div class="meta"><strong>${context_label}</strong> · ${context_text}</div>
+            <div class="meta"><strong>요청된 방식:</strong> ${style} 말하기</div>
+
+            <div class="recording-status" id="status">${TEXTS.ready}</div>
+            <div class="timer" id="timer"></div>
+
+            <div class="control-buttons">
+              <button class="record-btn" id="recordBtn" onclick="handleRecord()">${TEXTS.recordBtn}</button>
+              <button class="stop-btn" id="stopBtn" onclick="handleStop()" disabled>${TEXTS.stopBtn}</button>
+              <button class="next-btn" id="nextBtn" style="display:none;">${TEXTS.nextBtn}</button>
+            </div>
+          </div>
+        `,
+        choices: [],
+        on_load: function () {
+          console.log(`\n=== Trial ${index + 1} / ${TRIAL_ITEMS.length} ===`, item);
+          audioChunks = [];
+          isRecording = false;
+
+          // 녹음 시작
+          window.handleRecord = async () => {
+            const recordBtn = document.getElementById('recordBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const statusEl = document.getElementById('status');
+
+            if (isRecording) return;
+
+            try {
+              await startRecording();
+              isRecording = true;
+
+              recordBtn.disabled = true;
+              stopBtn.disabled = false;
+
+              if (statusEl) {
+                statusEl.innerHTML = TEXTS.recording;
+                statusEl.classList.add('recording-active');
+              }
+
+              // 타이머
+              let seconds = 0;
+              currentTimerInterval = setInterval(() => {
+                seconds++;
+                const timerEl = document.getElementById('timer');
+                if (timerEl) timerEl.textContent = `${seconds}초`;
+              }, 1000);
+
+              console.log('Recording started');
+            } catch (err) {
+              console.error('Failed to start recording:', err);
+              alert('녹음 시작 실패: ' + err.message);
+            }
+          };
+
+          // 녹음 중지 + 업로드
+          window.handleStop = async () => {
+            const stopBtn = document.getElementById('stopBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const statusEl = document.getElementById('status');
+
+            if (!isRecording) return;
+            stopBtn.disabled = true;
+
+            try {
+              if (statusEl) {
+                statusEl.innerHTML = '녹음 중지 중...';
+                statusEl.classList.remove('recording-active');
+              }
+
+              await stopRecording();
+              isRecording = false;
+
+              // 타이머 정지
+              if (currentTimerInterval) {
+                clearInterval(currentTimerInterval);
+                currentTimerInterval = null;
+              }
+
+              console.log('Recording stopped, chunks:', audioChunks.length);
+
+              // WAV 변환 및 업로드
+              if (audioChunks.length > 0) {
+                if (statusEl) statusEl.innerHTML = 'WAV 변환 중...';
+                const webmBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                console.log('WebM size:', webmBlob.size, 'bytes');
+
+                const wavBlob = await convertWebMToWav(webmBlob);
+                console.log('WAV size:', wavBlob.size, 'bytes');
+
+                if (statusEl) statusEl.innerHTML = '⏳ 서버에 업로드 중...';
+
+                const success = await uploadSingleRecording({
+                  sentence,
+                  index,
+                  blob: wavBlob,
+                  timestamp: new Date().toISOString(),
+                  meta: { keyword, context_label, context_text, style }
+                });
+
+                if (success) {
+                  console.log(`✓ Upload successful for trial ${index + 1}`);
+                  if (statusEl) statusEl.innerHTML = '✅ 업로드 완료!';
+                } else {
+                  console.error(`✗ Upload failed for trial ${index + 1}`);
+                  if (statusEl) statusEl.innerHTML = '❌ 업로드 실패. 다시 시도하거나 관리자에게 문의하세요.';
+                }
+              } else {
+                if (statusEl) statusEl.innerHTML = '⚠️ 녹음된 데이터가 없습니다.';
+              }
+
+              // 다음 버튼
+              if (nextBtn) {
+                nextBtn.style.display = 'inline-block';
+                nextBtn.onclick = () => {
+                  jsPsych.finishTrial({
+                    task: 'recording',
+                    sentence,
+                    sentence_index: index,
+                    keyword,
+                    context_label,
+                    context_text,
+                    style,
+                    timestamp: new Date().toISOString()
+                  });
+                };
+              }
+
+            } catch (err) {
+              console.error('Error during stop:', err);
+              if (statusEl) statusEl.innerHTML = '❌ 오류: ' + err.message;
+
+              if (nextBtn) {
+                nextBtn.style.display = 'inline-block';
+                nextBtn.onclick = () => {
+                  jsPsych.finishTrial({
+                    task: 'recording',
+                    sentence,
+                    sentence_index: index,
+                    keyword,
+                    context_label,
+                    context_text,
+                    style,
+                    error: err.message,
+                    timestamp: new Date().toISOString()
+                  });
+                };
+              }
+            }
+          };
+        }
+      };
     }
 
-    /* ===== GOOGLE UPLOAD ===== */
-    async function uploadAllRowsToGoogle() {
-      if (!GAS_ENDPOINT || GAS_ENDPOINT.startsWith('PASTE_')) {
-        console.warn('No GAS endpoint configured.');
+    /* ===== RECORDING CORE ===== */
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, sampleRate: 16000 }
+        });
+
+        audioChunks = []; // reset
+
+        const options = { mimeType: 'audio/webm' };
+        mediaRecorder = new MediaRecorder(stream, options);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+            console.log('Audio chunk received:', event.data.size, 'bytes');
+          }
+        };
+
+        mediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event);
+        };
+
+        mediaRecorder.start(100); // collect every 100 ms
+        console.log('MediaRecorder started');
+      } catch (err) {
+        console.error('Recording start error:', err);
+        throw err;
+      }
+    }
+
+    function stopRecording() {
+      return new Promise((resolve, reject) => {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+          console.log('MediaRecorder already inactive');
+          resolve();
+          return;
+        }
+
+        const timeout = setTimeout(() => reject(new Error('Recording stop timeout')), 5000);
+
+        mediaRecorder.onstop = () => {
+          clearTimeout(timeout);
+          mediaRecorder.stream.getTracks().forEach(track => track.stop());
+          console.log('MediaRecorder stopped and tracks released');
+          resolve();
+        };
+
+        try { mediaRecorder.stop(); }
+        catch (err) {
+          clearTimeout(timeout);
+          reject(err);
+        }
+      });
+    }
+
+    /* ===== WEBM → WAV ===== */
+    async function convertWebMToWav(webmBlob) {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const arrayBuffer = await webmBlob.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        console.log('Audio decoded:', {
+          duration: audioBuffer.duration,
+          sampleRate: audioBuffer.sampleRate,
+          channels: audioBuffer.numberOfChannels
+        });
+
+        const wavBlob = audioBufferToWav(audioBuffer);
+        await audioContext.close();
+        return wavBlob;
+      } catch (err) {
+        console.error('WAV conversion error:', err);
+        throw new Error('WAV 변환 실패: ' + err.message);
+      }
+    }
+
+    function audioBufferToWav(audioBuffer) {
+      const numChannels = 1;       // mono
+      const sampleRate = audioBuffer.sampleRate;
+      const format = 1;            // PCM
+      const bitDepth = 16;
+
+      const bytesPerSample = bitDepth / 8;
+      const blockAlign = numChannels * bytesPerSample;
+
+      // use channel 0
+      const source = audioBuffer.getChannelData(0);
+      const samples = new Float32Array(source.length);
+      samples.set(source);
+
+      // interleave (mono, so just scale)
+      const dataLength = samples.length * blockAlign;
+      const buffer = new ArrayBuffer(44 + dataLength);
+      const view = new DataView(buffer);
+
+      // RIFF/WAVE header
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + dataLength, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, format, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * blockAlign, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitDepth, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, dataLength, true);
+
+      // PCM samples
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        const int16 = s < 0 ? s * 0x8000 : s * 0x7FFF;
+        view.setInt16(offset, int16, true);
+        offset += 2;
+      }
+      return new Blob([buffer], { type: 'audio/wav' });
+    }
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+    }
+
+    /* ===== UPLOAD: Google Apps Script ===== */
+    async function uploadSingleRecording(recordingData) {
+      if (!GAS_ENDPOINT || GAS_ENDPOINT === 'YOUR_APPS_SCRIPT_URL') {
+        console.error('Google Apps Script endpoint not configured!');
+        alert('업로드 실패: Google Apps Script URL이 설정되지 않았습니다.');
         return false;
       }
+      if (!demographicsData) {
+        console.error('Demographics data not available!');
+        alert('참가자 정보가 없습니다. 페이지를 새로고침하고 다시 시도해주세요.');
+        return false;
+      }
+
       try {
-        const allData = jsPsych.data.get().values();
-        
-        const demoData = allData.find(d => d.task === 'demographics');
-        const demographics = demoData?.response || {};
-        
-        const rows = allData
-          .filter(d => d.task === 'rating')
-          .map(d => {
-            // rt 필드를 명시적으로 제외
-            const { rt, rt_original, rt_after_audio, ...cleanData } = d;
-            return {
-              trial_index:      cleanData.trial_index,
-              task:             cleanData.task,
-              stimulus:         cleanData.stimulus || cleanData.stimulus_file || '',
-              rating:           cleanData.rating ?? cleanData.response,
-              time_elapsed:     cleanData.time_elapsed,
-              trial_start_time: cleanData.trial_start_time || '',
-              response_time:    cleanData.response_time || '',
-              user_agent:       cleanData.user_agent || navigator.userAgent,
-              gender:           demographics.gender || '',
-              birth_year:       demographics.birth_year || '',
-              birth_month:      demographics.birth_month || '',
-              native_lang:      demographics.native_lang || '',
-              dialect:          demographics.dialect || '',
-              foreign_lang:     demographics.foreign_lang || ''
-            };
-          });
+        const base64Audio = await blobToBase64(recordingData.blob);
+        const payload = {
+          participant_id: participantId,
+          sentence_index: recordingData.index,
+          sentence: recordingData.sentence,
+          audio_data: base64Audio,
+          timestamp: recordingData.timestamp,
+          demographics: demographicsData,
+          meta: recordingData.meta // keyword, context_label, context_text, style
+        };
+
+        console.log('=== Uploading ===', payload);
 
         await fetch(GAS_ENDPOINT, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(rows)
+          mode: 'no-cors', // CORS 회피
+          headers: { 'Content-Type': 'text/plain' }, // no-cors에서 허용되는 헤더
+          body: JSON.stringify(payload)
         });
-        console.log('Upload attempted. Check your Google Sheet.');
+
+        console.log('Upload request sent (no-cors mode)');
         return true;
-      } catch (e) {
-        console.warn('Upload error:', e);
+      } catch (err) {
+        console.error('Upload error:', err);
+        alert(`업로드 실패: ${err.message}`);
         return false;
       }
     }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    /* ===== END ===== */
+    const end = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `<h2>${TEXTS.endTitle}</h2><p>${TEXTS.endBody}</p><p>모든 녹음 파일이 저장되었습니다.</p>`,
+      choices: [TEXTS.finishBtn]
+    };
+
+    /* ===== BUILD & RUN TIMELINE ===== */
+    const recording_trials = TRIAL_ITEMS.map((item, idx) => makeRecordingTrial(item, idx));
+
+    console.log('Starting experiment...');
+    jsPsych.run([
+      welcome,
+      instructions,      // 연구 안내 추가
+      demographics,
+      mic_permission,
+      ...recording_trials,
+      end
+    ]);
   </script>
 </body>
 </html>
+

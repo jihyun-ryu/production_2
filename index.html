@@ -166,38 +166,36 @@
     };
 
     /* ===== INSTRUCTIONS (연구 소개/방법/주의) ===== */
-const instructions = {
-  type: jsPsychHtmlButtonResponse,
-  stimulus: `
-    <div class="form-container" style="max-width:800px;">
-      <h2>안녕하세요.</h2>
-      <p>저희는 <strong>영어음성학프로젝트</strong> 수업 중 <em>Sarcasm in Korean</em>을 주제로 연구하고 있는 <strong>곽성민, 류지현</strong>입니다.</p>
-      <p><strong>7가지 상황</strong>을 <strong>3가지 방식</strong>(일반/진심/비꼼)으로 녹음하며, 약 <strong>5–10분</strong>이 소요됩니다.<br>
-      수집된 음성은 <strong>음성 분석 후 즉시 폐기</strong>됩니다.</p>
+    const instructions = {
+      type: jsPsychHtmlButtonResponse,
+      stimulus: `
+        <div class="form-container" style="max-width:800px;">
+          <h2>안녕하세요.</h2>
+          <p>저희는 <strong>영어음성학프로젝트</strong> 수업 중 <em>Sarcasm in Korean</em>을 주제로 연구하고 있는 <strong>곽성민, 류지현</strong>입니다.</p>
+          <p><strong>7가지 상황</strong>을 <strong>3가지 방식</strong>(일반/진심/비꼼)으로 녹음하며, 약 <strong>5–10분</strong>이 소요됩니다.<br>
+          수집된 음성은 <strong>음성 분석 후 즉시 폐기</strong>됩니다.</p>
 
-      <h3>참여 방법</h3>
-      <ul>
-        <li>각 상황에는 <strong>강조된 단어</strong>(예: “잘한다”)가 있습니다.</li>
-        <li>해당 단어를 표시된 <strong>세 가지 방식</strong>으로 각각 녹음합니다. <em>(제시 순서는 무작위)</em></li>
-        <li>(a) 일반적 말하기 방식 &nbsp; (b) 진심으로 말하는 방식 &nbsp; (c) 비꼬는(풍자적) 방식</li>
-      </ul>
+          <h3>참여 방법</h3>
+          <ul>
+            <li>각 상황에는 <strong>강조된 단어</strong>(예: “잘한다”)가 있습니다.</li>
+            <li>해당 단어를 표시된 <strong>세 가지 방식</strong>으로 각각 녹음합니다. <em>(제시 순서는 무작위)</em></li>
+            <li>(a) 일반적 말하기 방식 &nbsp; (b) 진심으로 말하는 방식 &nbsp; (c) 비꼬는(풍자적) 방식</li>
+          </ul>
 
-      <h3>주의 사항</h3>
-      <ul>
-        <li>부착된 마이크를 입에서 <strong>약 10cm</strong> 떨어진 위치에 두고 녹음해주세요.</li>
-        <li>주변 소음을 최소화한 <strong>조용한 환경</strong>에서 진행해주세요.</li>
-        <li><strong>자연스러운 발화</strong>가 중요합니다. 과장하지 말고 평소 말하듯이 읽어주세요.</li>
-      </ul>
+          <h3>주의 사항</h3>
+          <ul>
+            <li>부착된 마이크를 입에서 <strong>약 10cm</strong> 떨어진 위치에 두고 녹음해주세요.</li>
+            <li>주변 소음을 최소화한 <strong>조용한 환경</strong>에서 진행해주세요.</li>
+            <li><strong>자연스러운 발화</strong>가 중요합니다. 과장하지 말고 평소 말하듯이 읽어주세요.</li>
+          </ul>
 
-      <p style="color:#d93025; font-weight:bold; font-size:18px; margin-top:25px;">
-        ⚠️ 수도권(서울·경기·인천) 이외 지역의 방언을 사용하시는 분은<br>
-        본 실험에 참여하실 수 없습니다.
-      </p>
-    </div>
-  `,
-  choices: ['시작하기']
-};
-
+          <p style="color:#d93025; font-weight:bold; font-size:18px; margin-top:25px;">
+            ⚠️ <u>수도권(서울·경기·인천) 이외 지역에서 녹음하시는 분은 본 실험에 참여하실 수 없습니다.</u>
+          </p>
+        </div>
+      `,
+      choices: ['시작하기']
+    };
 
     /* ===== DEMOGRAPHICS ===== */
     const demographics = {
@@ -256,62 +254,62 @@ const instructions = {
       }
     };
 
-    /* ===== 7 키워드 × (중립/진심/비꼼) 정의 ===== */
+    /* ===== 7 키워드 × (세 가지 방식) 정의 ===== */
     const SCENARIOS = [
       {
         keyword: "잘한다",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 과제를 제출하고 '잘했지?'라고 물을 때", sentence: "잘한다" },
-          { style: "진심으로", label: "상황", context: "친구가 과제에서 1등을 하고 '나 잘했지?'라고 말할 때",       sentence: "잘한다" },
-          { style: "비꼬는 말투로", label: "상황", context: "친구가 과제를 겨우 제출하고 '나 잘했지?'라고 말할 때",         sentence: "잘한다" },
+          { style: "일반 대화",     label: "상황", context: "친구가 과제를 제출하고 '잘했지?'라고 물을 때",                 sentence: "잘한다" },
+          { style: "진심으로",       label: "상황", context: "친구가 과제에서 1등을 하고 '나 잘했지?'라고 말할 때",         sentence: "잘한다" },
+          { style: "비꼬는 말투로",  label: "상황", context: "친구가 과제를 겨우 제출하고 '나 잘했지?'라고 말할 때",         sentence: "잘한다" },
         ]
       },
       {
         keyword: "대단하다",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 시험을 끝내고 왔을 때",                     sentence: "대단하다" },
-          { style: "진심으로", label: "상황", context: "친구가 시험을 정말 열심히 준비해서 높은 점수를 받았을 때",       sentence: "대단하다" },
-          { style: "비꼬는 말투로", label: "상황", context: "친구가 거의 운으로 높은 점수를 받았다고 신나 있을 때",               sentence: "대단하다" },
+          { style: "일반 대화",     label: "상황", context: "친구가 시험을 끝내고 왔을 때",                                 sentence: "대단하다" },
+          { style: "진심으로",       label: "상황", context: "친구가 시험을 정말 열심히 준비해서 높은 점수를 받았을 때",     sentence: "대단하다" },
+          { style: "비꼬는 말투로",  label: "상황", context: "친구가 거의 운으로 높은 점수를 받았다고 신나 있을 때",         sentence: "대단하다" },
         ]
       },
       {
         keyword: "좋았어",
         items: [
-          { style: "일반 대화", label: "상황",  context: "발표를 무난히 마친 상황에서 '어땠어?'라고 물을 때",               sentence: "좋았어" },
-          { style: "진심으로", label: "상황", context: "발표를 유창하게 잘 끝낸 친구가 '좋았지?'라고 물을 때",          sentence: "좋았어" },
-          { style: "비꼬는 말투로", label: "상황", context: "준비 없이 발표하고도 당당한 친구가 '좋았지?'라고 말할 때",        sentence: "좋았어" },
+          { style: "일반 대화",     label: "상황", context: "발표를 무난히 마친 상황에서 '어땠어?'라고 물을 때",             sentence: "좋았어" },
+          { style: "진심으로",       label: "상황", context: "발표를 유창하게 잘 끝낸 친구가 '좋았지?'라고 물을 때",         sentence: "좋았어" },
+          { style: "비꼬는 말투로",  label: "상황", context: "준비 없이 발표하고도 당당한 친구가 '좋았지?'라고 말할 때",     sentence: "좋았어" },
         ]
       },
       {
         keyword: "대박이다",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 운동을 다녀왔다고 말할 때",                        sentence: "대박이다" },
-          { style: "진심으로", label: "상황", context: "친구가 꾸준히 운동해서 체력이 좋아진 걸 보여줄 때",              sentence: "대박이다" },
-          { style: "비꼬는 말투로", label: "상황", context: "이틀 운동해놓고 '나 벌써 달라졌지?' 하는 친구에게",               sentence: "대박이다" },
+          { style: "일반 대화",     label: "상황", context: "친구가 운동을 다녀왔다고 말할 때",                             sentence: "대박이다" },
+          { style: "진심으로",       label: "상황", context: "친구가 꾸준히 운동해서 체력이 좋아진 걸 보여줄 때",           sentence: "대박이다" },
+          { style: "비꼬는 말투로",  label: "상황", context: "이틀 운동해놓고 '나 벌써 달라졌지?' 하는 친구에게",            sentence: "대박이다" },
         ]
       },
       {
         keyword: "참 잘해",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 평범하게 요리했을 때",                                     sentence: "참 잘해" },
-          { style: "진심으로", label: "상황", context: "친구가 정성 들여 요리해서 정말 맛있을 때",                            sentence: "참 잘해" },
-          { style: "비꼬는 말투로", label: "상황", context: "맛은 별론데 친구가 스스로 칭찬할 때",                            sentence: "참 잘해" },
+          { style: "일반 대화",     label: "상황", context: "친구가 평범하게 요리했을 때",                                   sentence: "참 잘해" },
+          { style: "진심으로",       label: "상황", context: "친구가 정성 들여 요리해서 정말 맛있을 때",                    sentence: "참 잘해" },
+          { style: "비꼬는 말투로",  label: "상황", context: "맛은 별론데 친구가 스스로 칭찬할 때",                          sentence: "참 잘해" },
         ]
       },
       {
         keyword: "멋있다",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 일상을 성실히 해낸 보통의 상황에서",                        sentence: "멋있다" },
-          { style: "진심으로", label: "상황", context: "친구가 힘든 상황을 참아내고 결국 회복했을 때",                         sentence: "멋있다" },
-          { style: "비꼬는 말투로", label: "상황", context: "별일 아닌 걸 엄청 고생한 것처럼 말할 때",                         sentence: "멋있다" },
+          { style: "일반 대화",     label: "상황", context: "친구가 일상을 성실히 해낸 보통의 상황에서",                     sentence: "멋있다" },
+          { style: "진심으로",       label: "상황", context: "친구가 힘든 상황을 참아내고 결국 회복했을 때",                 sentence: "멋있다" },
+          { style: "비꼬는 말투로",  label: "상황", context: "별일 아닌 걸 엄청 고생한 것처럼 말할 때",                      sentence: "멋있다" },
         ]
       },
       {
         keyword: "역시",
         items: [
-          { style: "일반 대화", label: "상황",  context: "친구가 평소처럼 약속을 지킨 상황에서",                             sentence: "역시" },
-          { style: "진심으로", label: "상황", context: "친구가 약속 시간을 잘 맞춰서 도착했을 때",                   sentence: "역시" },
-          { style: "비꼬는 말투로", label: "상황", context: "항상 늦는 친구가 또 늦고 '그래도 많이 안 늦었지?' 할 때",          sentence: "역시" },
+          { style: "일반 대화",     label: "상황", context: "친구가 평소처럼 약속을 지킨 상황에서",                           sentence: "역시" },
+          { style: "진심으로",       label: "상황", context: "친구가 약속 시간을 잘 맞춰서 도착했을 때",                     sentence: "역시" },
+          { style: "비꼬는 말투로",  label: "상황", context: "항상 늦는 친구가 또 늦고 '그래도 많이 안 늦었지?' 할 때",       sentence: "역시" },
         ]
       },
     ];
@@ -322,9 +320,9 @@ const instructions = {
         s.items.map(it => ({
           keyword: s.keyword,
           sentence: it.sentence,
-          context_label: it.label,   // "중립" | "상황1" | "상황2"
+          context_label: it.label,
           context_text: it.context,
-          style: it.style            // "일반" | "진심" | "비꼼"
+          style: it.style
         }))
       )
     );
@@ -355,7 +353,7 @@ const instructions = {
         `,
         choices: [],
         on_load: function () {
-          console.log(`\n=== Trial ${index + 1} / ${TRIAL_ITEMS.length} ===`, item);
+          console.log(\`\\n=== Trial \${index + 1} / \${TRIAL_ITEMS.length} ===\`, item);
           audioChunks = [];
           isRecording = false;
 
@@ -384,7 +382,7 @@ const instructions = {
               currentTimerInterval = setInterval(() => {
                 seconds++;
                 const timerEl = document.getElementById('timer');
-                if (timerEl) timerEl.textContent = `${seconds}초`;
+                if (timerEl) timerEl.textContent = \`\${seconds}초\`;
               }, 1000);
 
               console.log('Recording started');
@@ -440,10 +438,10 @@ const instructions = {
                 });
 
                 if (success) {
-                  console.log(`✓ Upload successful for trial ${index + 1}`);
+                  console.log(\`✓ Upload successful for trial \${index + 1}\`);
                   if (statusEl) statusEl.innerHTML = '✅ 업로드 완료!';
                 } else {
-                  console.error(`✗ Upload failed for trial ${index + 1}`);
+                  console.error(\`✗ Upload failed for trial \${index + 1}\`);
                   if (statusEl) statusEl.innerHTML = '❌ 업로드 실패. 다시 시도하거나 관리자에게 문의하세요.';
                 }
               } else {
@@ -585,8 +583,8 @@ const instructions = {
       const samples = new Float32Array(source.length);
       samples.set(source);
 
-      // interleave (mono, so just scale)
-      const dataLength = samples.length * blockAlign;
+      // PCM buffer
+      const dataLength = samples.length * 2;
       const buffer = new ArrayBuffer(44 + dataLength);
       const view = new DataView(buffer);
 
@@ -596,12 +594,12 @@ const instructions = {
       writeString(view, 8, 'WAVE');
       writeString(view, 12, 'fmt ');
       view.setUint32(16, 16, true);
-      view.setUint16(20, format, true);
-      view.setUint16(22, numChannels, true);
+      view.setUint16(20, 1, true); // PCM
+      view.setUint16(22, 1, true); // mono
       view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * blockAlign, true);
-      view.setUint16(32, blockAlign, true);
-      view.setUint16(34, bitDepth, true);
+      view.setUint32(28, sampleRate * 2, true); // byte rate
+      view.setUint16(32, 2, true); // block align
+      view.setUint16(34, 16, true); // bits per sample
       writeString(view, 36, 'data');
       view.setUint32(40, dataLength, true);
 
@@ -687,7 +685,7 @@ const instructions = {
     console.log('Starting experiment...');
     jsPsych.run([
       welcome,
-      instructions,      // 연구 안내 추가
+      instructions,      // 연구 안내 + 수도권 제한 문구
       demographics,
       mic_permission,
       ...recording_trials,
@@ -696,6 +694,7 @@ const instructions = {
   </script>
 </body>
 </html>
+
 
 
 
